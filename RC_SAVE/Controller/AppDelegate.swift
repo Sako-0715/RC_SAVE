@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import RealmSwift
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -13,7 +14,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
+        // Realmのマイグレーション設定
+        let config = Realm.Configuration(
+            schemaVersion: 1, // スキーマのバージョンを増やす
+            migrationBlock: { migration, oldSchemaVersion in
+                if oldSchemaVersion < 1 {
+                    // 新しいプロパティ 'Date' を既存のオブジェクトに追加
+                    migration.enumerateObjects(ofType: ImageRealm.className()) { oldObject, newObject in
+                        newObject!["Date"] = ""
+                    }
+                }
+            }
+        )
+        
+        Realm.Configuration.defaultConfiguration = config
         return true
     }
 

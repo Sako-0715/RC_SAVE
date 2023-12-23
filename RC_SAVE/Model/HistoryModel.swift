@@ -6,3 +6,10 @@
 //
 
 import Foundation
+struct HistoryData: Codable {
+    let ID: String
+    let JANL: String
+    let PRICE: Int
+    let PRODACTNAME: String
+    let DATE: String
+}
