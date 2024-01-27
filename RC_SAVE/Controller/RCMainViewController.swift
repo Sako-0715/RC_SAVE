@@ -29,6 +29,8 @@ class RCMainViewController: UIViewController,UITextFieldDelegate,UIPickerViewDel
     //個数
     var PriceInt = [Int]()
     
+    let baseRequestAPIModel = BaseRequestAPIModel()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         JanlText.inputView = JanlPicker
@@ -112,40 +114,39 @@ class RCMainViewController: UIViewController,UITextFieldDelegate,UIPickerViewDel
     
     
     @IBAction func SendButton(_ sender: Any) {
-        Api()
+        sendApi()
     }
     
-    func Api() {
-           //データーベースに送信する
-           let url = "http://localhost:8888/iOS/Controller/ShopingController.php"
-           let date = Date() // May 4, 2020, 11:16 AM
-           let formatter = DateFormatter()
-           formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
-           let strDate = formatter.string(from: date) // 2020-05-04 11:16:31
-           let id = createID()
-           
-           let shopdata:[String: Any] = ["ID": id,"Janl":JanlText.text!,"Price":PriceText.text!,"Prodact": ProdactText.text!,"date":strDate]
-        if let image = pickedImage {
-                // 画像が選択されている場合、Realmに保存
-                if let imageData = image.jpegData(compressionQuality: 1.0) {
-                    saveIDTRealm(imageData: imageData,id: id,Date: strDate)
-                }
+    func sendApi() {
+        let date = Date()
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        let strDate = formatter.string(from: date)
+        let id = createID()
+        
+        let janl = JanlText.text ?? ""
+        let price = PriceText.text ?? ""
+        let prodact = ProdactText.text ?? ""
+        
+        baseRequestAPIModel.postShoppingData(id: id, janl: janl, price: price, prodact: prodact, date: strDate) { [self] result in
+            switch result {
+            case .success(let responseString):
+                if let image = pickedImage {
+                        // 画像が選択されている場合、Realmに保存
+                        if let imageData = image.jpegData(compressionQuality: 1.0) {
+                            saveIDTRealm(imageData: imageData,id: id,Date: strDate)
+                        }
+                    }
+            case .failure(let error):
+                        print("API Error: \(error)")
+                        // エラー時の処理を追加
+                    }
             }
-           AF.request(url,method:.post,parameters: shopdata,encoding:URLEncoding.default).responseData { response in
-               switch response.result {
-               case.success(let data):
-                   //print(String(data: data, encoding: .utf8)!)
-                   self.ProdactText.text = String(data: data, encoding: .utf8)!
-               case.failure(let error):print("Errcxor: \(error)")
-               }
-           }
-           
-           
-           RCImage.image =  UIImage(named: "cart.badge.plus")
-           JanlText.text = ""
-           PriceText.text = ""
-           ProdactText.text = ""
-       }
+        RCImage.image =  UIImage(named: "cart.badge.plus")
+        JanlText.text = ""
+        PriceText.text = ""
+        ProdactText.text = ""
+    }
        
        // IDをRealmに保存する
     func saveIDTRealm(imageData: Data,id:String,Date:String) {

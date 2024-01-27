@@ -12,6 +12,7 @@ import Alamofire
 class RCHistroryViewController: UIViewController,UITableViewDelegate,UITableViewDataSource {
     
     var historyDataArray: [HistoryData] = []
+    let baseRequestAPIModel = BaseRequestAPIModel()
     
     @IBOutlet weak var tableView: UITableView!
     override func viewDidLoad() {
@@ -42,7 +43,7 @@ class RCHistroryViewController: UIViewController,UITableViewDelegate,UITableView
     
     func Api() {
         //データーベースに送信する
-        let url = "http://localhost:8888/iOS/Controller/ShopingHistoryController.php"
+        let url = "http://localhost:8888/KeepFood/iOS/Controller/ShopingHistoryController.php"
         AF.request(url).responseData { response in
             switch response.result {
             case.success(let data):
