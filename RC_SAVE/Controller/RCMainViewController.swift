@@ -132,16 +132,22 @@ class RCMainViewController: UIViewController,UITextFieldDelegate,UIPickerViewDel
             switch result {
             case .success(let responseString):
                 if let image = pickedImage {
-                        // 画像が選択されている場合、Realmに保存
-                        if let imageData = image.jpegData(compressionQuality: 1.0) {
-                            saveIDTRealm(imageData: imageData,id: id,Date: strDate)
-                        }
+                    // 画像が選択されている場合、Realmに保存
+                    if let imageData = image.jpegData(compressionQuality: 1.0) {
+                        saveIDTRealm(imageData: imageData,id: id,Date: strDate)
                     }
+                }
             case .failure(let error):
-                        print("API Error: \(error)")
-                        // エラー時の処理を追加
-                    }
+                print("API Error: \(error)")
             }
+            if let image = pickedImage {
+                if let imageData = image.jpegData(compressionQuality: 1.0) {
+                    DispatchQueue.main.async {
+                        saveIDTRealm(imageData: imageData, id: id, Date: strDate)
+                    }
+                }
+            }
+        }
         RCImage.image =  UIImage(named: "cart.badge.plus")
         JanlText.text = ""
         PriceText.text = ""
